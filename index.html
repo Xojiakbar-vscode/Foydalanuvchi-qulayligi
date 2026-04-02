@@ -1,0 +1,760 @@
+
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>SmartForm | Validatsiya & Foydalanish qulayligi simulyatori</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, 'Segoe UI', 'Inter', 'Roboto', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(145deg, #e9f0fc 0%, #d9e4f5 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem 1.5rem;
+        }
+
+        /* asosiy karta */
+        .test-card {
+            max-width: 780px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(0px);
+            border-radius: 2.5rem;
+            box-shadow: 0 25px 45px -12px rgba(0, 0, 0, 0.35), 0 4px 12px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            transition: all 0.2s ease;
+        }
+
+        /* header */
+        .sim-header {
+            background: #1a2c3e;
+            padding: 1.4rem 2rem;
+            color: white;
+        }
+
+        .sim-header h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            letter-spacing: -0.3px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .badge-sim {
+            background: #ffb347;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.25rem 0.85rem;
+            border-radius: 40px;
+            color: #1e2a36;
+            margin-left: 12px;
+        }
+
+        .sub {
+            font-size: 0.9rem;
+            opacity: 0.85;
+            margin-top: 8px;
+            border-left: 3px solid #ffb347;
+            padding-left: 12px;
+        }
+
+        /* real-time simulyator paneli */
+        .sim-panel {
+            background: #fef9e8;
+            border-bottom: 1px solid #ffe1a0;
+            padding: 0.9rem 2rem;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            font-size: 0.85rem;
+        }
+
+        .sim-status {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .status-chip {
+            background: white;
+            border-radius: 40px;
+            padding: 0.35rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .status-chip .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 10px;
+            background: #aaa;
+        }
+
+        .status-chip.active .dot {
+            background: #2b9348;
+            box-shadow: 0 0 0 2px #b7efc5;
+        }
+
+        .sim-actions button {
+            background: #2c3e50;
+            border: none;
+            color: white;
+            padding: 0.4rem 1rem;
+            border-radius: 40px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-left: 8px;
+        }
+
+        .sim-actions button:hover {
+            background: #1e2f3f;
+            transform: scale(0.96);
+        }
+
+        /* asosiy forma */
+        .form-container {
+            padding: 2rem 2rem 1.8rem;
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        label {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #1f2d3a;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .req {
+            color: #c44536;
+            font-size: 0.75rem;
+            background: #ffe6e2;
+            padding: 2px 8px;
+            border-radius: 20px;
+        }
+
+        input, select, textarea {
+            padding: 0.85rem 1rem;
+            border-radius: 1.25rem;
+            border: 1.5px solid #e2e8f0;
+            background: white;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+            outline: none;
+            width: 100%;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.2);
+        }
+
+        .error-msg {
+            font-size: 0.75rem;
+            color: #dc2626;
+            margin-top: 4px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .valid-feedback {
+            font-size: 0.7rem;
+            color: #2b9348;
+            margin-top: 2px;
+        }
+
+        /* row 2 column */
+        .row-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        /* tugmalar */
+        .form-actions {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 2rem;
+            gap: 15px;
+        }
+
+        .btn-primary {
+            background: #1f6392;
+            color: white;
+            border: none;
+            padding: 0.85rem 2rem;
+            border-radius: 2rem;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+
+        .btn-primary:hover {
+            background: #0e4b72;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #eef2f6;
+            border: none;
+            padding: 0.8rem 1.6rem;
+            border-radius: 2rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-secondary:hover {
+            background: #e2e8f0;
+        }
+
+        /* qabul qilish simulyatsiyasi */
+        .acceptance-area {
+            background: #f1f5f9;
+            margin: 0 2rem 2rem 2rem;
+            border-radius: 1.5rem;
+            padding: 1.2rem 1.5rem;
+            border-left: 6px solid #ffb347;
+        }
+
+        .acceptance-title {
+            font-weight: 700;
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+
+        .toggle-accept {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: white;
+            padding: 6px 16px;
+            border-radius: 60px;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 48px;
+            height: 24px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: 0.2s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: 0.2s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #2b9348;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(24px);
+        }
+
+        .accept-status-msg {
+            font-size: 0.85rem;
+            margin-top: 12px;
+            background: white;
+            padding: 10px 14px;
+            border-radius: 1rem;
+        }
+
+        .success-banner {
+            background: #d1fae5;
+            color: #065f46;
+            padding: 12px;
+            border-radius: 1rem;
+            text-align: center;
+            font-weight: 500;
+            margin-top: 10px;
+        }
+
+        /* mobil moslashuv */
+        @media (max-width: 640px) {
+            .row-2col {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            .form-container, .acceptance-area {
+                margin-left: 1rem;
+                margin-right: 1rem;
+            }
+            .sim-panel {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+
+        footer {
+            font-size: 0.7rem;
+            text-align: center;
+            padding: 1rem;
+            color: #5b6e8c;
+            border-top: 1px solid #e9edf2;
+        }
+    </style>
+</head>
+<body>
+
+<div class="test-card" id="appRoot">
+    <div class="sim-header">
+        <h1>
+            📋 Validatsiya simulyatori 
+            <span class="badge-sim">UX test · Qabul qilish</span>
+        </h1>
+        <div class="sub">Foydalanuvchi qabul qilish testi (UAT) · real vaqt validatsiya va foydalanish qulayligi treningi</div>
+    </div>
+
+    <!-- Simulyatsiya paneli (real-time interaktiv) -->
+    <div class="sim-panel">
+        <div class="sim-status">
+            <div class="status-chip" id="liveValidChip">
+                <span class="dot"></span> <span>Validatsiya holati: <strong id="validStateLabel">Kutilmoqda</strong></span>
+            </div>
+            <div class="status-chip" id="completeChip">
+                📋 To'liqlik: <strong id="completenessPercent">0%</strong>
+            </div>
+        </div>
+        <div class="sim-actions">
+            <button id="quickFillBtn" aria-label="Tezkor to‘ldirish">⚡ Tezkor test to‘ldirish</button>
+            <button id="resetFormBtn" aria-label="Formani tozalash">🔄 Tozalash</button>
+        </div>
+    </div>
+
+    <div class="form-container">
+        <form id="userForm" novalidate>
+            <div class="input-group">
+                <label>👤 Ism va familiya <span class="req">*</span></label>
+                <input type="text" id="fullname" placeholder="Masalan: Odilbek Karimov" autocomplete="name">
+                <div class="error-msg" id="fullnameError"></div>
+                <div class="valid-feedback" id="fullnameValid"></div>
+            </div>
+
+            <div class="row-2col">
+                <div class="input-group">
+                    <label>📧 Elektron pochta <span class="req">*</span></label>
+                    <input type="email" id="email" placeholder="odil@example.com" autocomplete="email">
+                    <div class="error-msg" id="emailError"></div>
+                </div>
+                <div class="input-group">
+                    <label>📞 Telefon raqam <span class="req">*</span></label>
+                    <input type="tel" id="phone" placeholder="+998 90 123 45 67">
+                    <div class="error-msg" id="phoneError"></div>
+                </div>
+            </div>
+
+            <div class="row-2col">
+                <div class="input-group">
+                    <label>🎂 Yosh (18-99) <span class="req">*</span></label>
+                    <input type="number" id="age" placeholder="25" min="18" max="99">
+                    <div class="error-msg" id="ageError"></div>
+                </div>
+                <div class="input-group">
+                    <label>🏙️ Shahar <span class="req">*</span></label>
+                    <select id="city">
+                        <option value="">Tanlang</option>
+                        <option value="toshkent">Toshkent</option>
+                        <option value="samarqand">Samarqand</option>
+                        <option value="buxoro">Buxoro</option>
+                        <option value="andijon">Andijon</option>
+                        <option value="nukus">Nukus</option>
+                    </select>
+                    <div class="error-msg" id="cityError"></div>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label>📝 Izoh yoki taklif (ixtiyoriy)</label>
+                <textarea id="comment" rows="2" placeholder="Foydalanish qulayligi haqida fikr..."></textarea>
+            </div>
+        </form>
+    </div>
+
+    <!-- Qabul qilish simulyatsiyasi (acceptance) -->
+    <div class="acceptance-area">
+        <div class="acceptance-title">
+            <span>✅ Foydalanuvchi qabul qilish simulyatsiyasi (User Acceptance)</span>
+            <div class="toggle-accept">
+                <span style="font-size:0.8rem;">📌 Tasdiqlash</span>
+                <label class="switch">
+                    <input type="checkbox" id="acceptToggle">
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+        <div class="accept-status-msg" id="acceptMessage">
+            📍 Forma maʼlumotlarini tekshirib, “Qabul qilish” tugmasini faollashtiring.
+        </div>
+        <div id="acceptDynamicMsg"></div>
+    </div>
+
+    <div class="form-actions" style="padding: 0 2rem 1.5rem 2rem;">
+        <button type="button" class="btn-secondary" id="previewBtn">🔍 Sinov tekshiruvi</button>
+        <button type="button" class="btn-primary" id="submitBtn" disabled>📨 Yakuniy topshirish (qabul qilish)</button>
+    </div>
+    <footer>
+        🧪 Seminarlar uchun interaktiv poligon | Real-time validatsiya, foydalanuvchi qabul qilish simulyatsiyasi, foydalanish qulayligi testi
+    </footer>
+</div>
+
+<script>
+    // DOM elementlari
+    const fullnameInput = document.getElementById('fullname');
+    const emailInput = document.getElementById('email');
+    const phoneInput = document.getElementById('phone');
+    const ageInput = document.getElementById('age');
+    const citySelect = document.getElementById('city');
+    const commentArea = document.getElementById('comment');
+    const acceptToggle = document.getElementById('acceptToggle');
+    const submitBtn = document.getElementById('submitBtn');
+    const previewBtn = document.getElementById('previewBtn');
+    const quickFillBtn = document.getElementById('quickFillBtn');
+    const resetFormBtn = document.getElementById('resetFormBtn');
+
+    // UI holat elementlari
+    const validStateLabel = document.getElementById('validStateLabel');
+    const completenessPercentSpan = document.getElementById('completenessPercent');
+    const fullnameError = document.getElementById('fullnameError');
+    const emailError = document.getElementById('emailError');
+    const phoneError = document.getElementById('phoneError');
+    const ageError = document.getElementById('ageError');
+    const cityError = document.getElementById('cityError');
+    const fullnameValidSpan = document.getElementById('fullnameValid');
+    const acceptMessageDiv = document.getElementById('acceptMessage');
+    const acceptDynamicMsg = document.getElementById('acceptDynamicMsg');
+
+    // validatsiya holatlari obyekti
+    let validation = {
+        fullname: false,
+        email: false,
+        phone: false,
+        age: false,
+        city: false
+    };
+
+    // umumiy validatsiya va UI yangilash
+    function validateFullname() {
+        const val = fullnameInput.value.trim();
+        if (val.length < 3) {
+            fullnameError.innerText = "❌ Kamida 3 ta harfdan iborat bo‘lishi kerak.";
+            fullnameValidSpan.innerText = "";
+            validation.fullname = false;
+            return false;
+        } else if (!/^[A-Za-zА-Яа-яЁё\s\-']+$/.test(val)) {
+            fullnameError.innerText = "❌ Faqat harflar, bo‘shliq va defis ruxsat etiladi.";
+            fullnameValidSpan.innerText = "";
+            validation.fullname = false;
+            return false;
+        } else {
+            fullnameError.innerText = "";
+            fullnameValidSpan.innerText = "✅ To‘g‘ri format";
+            validation.fullname = true;
+            return true;
+        }
+    }
+
+    function validateEmail() {
+        const email = emailInput.value.trim();
+        const emailRegex = /^[^\s@]+@([^\s@]+\.)+[^\s@]+$/;
+        if (email === "") {
+            emailError.innerText = "❌ Elektron pochta majburiy.";
+            validation.email = false;
+            return false;
+        } else if (!emailRegex.test(email)) {
+            emailError.innerText = "❌ Noto‘g‘ri email (mas: nom@domain.uz)";
+            validation.email = false;
+            return false;
+        } else {
+            emailError.innerText = "";
+            validation.email = true;
+            return true;
+        }
+    }
+
+    function validatePhone() {
+        let phone = phoneInput.value.trim();
+        // telefon: +998 yoki 998 yoki 90... oddiy tekshiruv: raqam va +, bo'shliqlarni olib tashlaymiz
+        const cleaned = phone.replace(/\s+/g, '');
+        const phoneRegex = /^(\+998|998)?[0-9]{9}$/;  // asosiy: 9 ta raqam yoki +998 bilan
+        let isValid = false;
+        if (cleaned === "") {
+            phoneError.innerText = "❌ Telefon raqam majburiy.";
+            isValid = false;
+        } else {
+            // raqamlar va + dan tashqari
+            if (!/^[\+0-9]+$/.test(cleaned)) {
+                phoneError.innerText = "❌ Faqat raqamlar va + belgisi.";
+                isValid = false;
+            } else {
+                let digitsOnly = cleaned.replace(/\D/g, '');
+                if (digitsOnly.length === 9) isValid = true;
+                else if (digitsOnly.length === 12 && digitsOnly.startsWith("998")) isValid = true;
+                else if (digitsOnly.length === 13 && digitsOnly.startsWith("998")) isValid = true;
+                else isValid = false;
+                if (!isValid) phoneError.innerText = "❌ Namuna: +998901234567 yoki 901234567";
+                else phoneError.innerText = "";
+            }
+        }
+        validation.phone = isValid;
+        return isValid;
+    }
+
+    function validateAge() {
+        const age = parseInt(ageInput.value, 10);
+        if (isNaN(age) || ageInput.value.trim() === "") {
+            ageError.innerText = "❌ Yoshni kiriting (18-99)";
+            validation.age = false;
+            return false;
+        } else if (age < 18 || age > 99) {
+            ageError.innerText = "❌ Yosh 18 dan 99 gacha bo‘lishi kerak.";
+            validation.age = false;
+            return false;
+        } else {
+            ageError.innerText = "";
+            validation.age = true;
+            return true;
+        }
+    }
+
+    function validateCity() {
+        const city = citySelect.value;
+        if (city === "") {
+            cityError.innerText = "❌ Shaharni tanlang.";
+            validation.city = false;
+            return false;
+        } else {
+            cityError.innerText = "";
+            validation.city = true;
+            return true;
+        }
+    }
+
+    // to'liqlik foizi (faqat majburiy maydonlar to'ldirilganligi bo'yicha, valid emas balki to'ldirilgan)
+    function computeCompleteness() {
+        let totalRequired = 5; // ism, email, phone, age, city
+        let filled = 0;
+        if (fullnameInput.value.trim().length > 0) filled++;
+        if (emailInput.value.trim().length > 0) filled++;
+        if (phoneInput.value.trim().length > 0) filled++;
+        if (ageInput.value.trim().length > 0 && !isNaN(parseInt(ageInput.value))) filled++;
+        if (citySelect.value !== "") filled++;
+        let percent = Math.round((filled / totalRequired) * 100);
+        completenessPercentSpan.innerText = `${percent}%`;
+        return percent;
+    }
+
+    // umumiy valid holatini tekshiradi va UI state yangilaydi
+    function updateGlobalValidationState() {
+        validateFullname();
+        validateEmail();
+        validatePhone();
+        validateAge();
+        validateCity();
+
+        const allValid = validation.fullname && validation.email && validation.phone && validation.age && validation.city;
+        if (allValid) {
+            validStateLabel.innerText = "✅ To‘liq valid";
+            const chip = document.getElementById('liveValidChip');
+            chip.classList.add('active');
+        } else {
+            validStateLabel.innerText = "⚠️ Maydonlarni to‘ldiring";
+            const chip = document.getElementById('liveValidChip');
+            chip.classList.remove('active');
+        }
+
+        // qabul qilish tugmasi va qabul toggle interfeysi
+        const isAccepted = acceptToggle.checked;
+        // agar forma valid bo'lsa, submit tugmasi enabled bo'ladi, aks holda disabled
+        if (allValid && isAccepted) {
+            submitBtn.disabled = false;
+        } else {
+            submitBtn.disabled = true;
+        }
+
+        // acceptance simulyatsiyasida xabar
+        if (!allValid && acceptToggle.checked) {
+            // agar toggle yoqilgan bo'lsa lekin forma valid emas -> ogohlantirish
+            acceptMessageDiv.innerHTML = "⚠️ <strong>Qabul qilish sharti:</strong> Forma to‘liq va to‘g‘ri to‘ldirilishi kerak. Iltimos xatolarni tuzating.";
+            acceptDynamicMsg.innerHTML = '<div style="color:#b45309;">❗ Forma valid emas, qabul qilish tugmasi faol emas.</div>';
+        } else if (allValid && !acceptToggle.checked) {
+            acceptMessageDiv.innerHTML = "📋 <strong>Qabul qilish simulyatsiyasi:</strong> Forma to‘g‘ri. Qabul qilish tugmachasini yoqing va yakuniy topshiring.";
+            acceptDynamicMsg.innerHTML = '<div style="color:#2563eb;">🔘 Qabul qilishni tasdiqlash uchun tugmani faollashtiring.</div>';
+        } else if (allValid && acceptToggle.checked) {
+            acceptMessageDiv.innerHTML = "✅ <strong>Qabul qilindi!</strong> Forma to‘liq valid va siz qabul qilishni tasdiqladingiz. Endi Yakuniy topshirish tugmasi faol.";
+            acceptDynamicMsg.innerHTML = '<div style="background:#e6f7e6; padding:8px; border-radius:12px;">🎉 Foydalanuvchi qabul qilish testi muvaffaqiyatli. Tizimga yuborish mumkin.</div>';
+        } else {
+            acceptMessageDiv.innerHTML = "📍 Forma maʼlumotlarini to‘g‘ri to‘ldiring va qabul qilish tugmachasini faollashtiring.";
+            acceptDynamicMsg.innerHTML = "";
+        }
+
+        computeCompleteness();
+    }
+
+    // barcha inputlarga event listenerlar
+    function attachEvents() {
+        fullnameInput.addEventListener('input', updateGlobalValidationState);
+        emailInput.addEventListener('input', updateGlobalValidationState);
+        phoneInput.addEventListener('input', updateGlobalValidationState);
+        ageInput.addEventListener('input', updateGlobalValidationState);
+        citySelect.addEventListener('change', updateGlobalValidationState);
+        acceptToggle.addEventListener('change', updateGlobalValidationState);
+        // qo'shimcha tekshiruv
+        commentArea.addEventListener('input', () => computeCompleteness());
+    }
+
+    // preview (sinov tekshiruvi)
+    function previewData() {
+        let allValidNow = validation.fullname && validation.email && validation.phone && validation.age && validation.city;
+        if (!allValidNow) {
+            alert("❌ Forma validatsiyadan o‘tmadi! Qizil xatolarni tekshiring.");
+        } else {
+            const data = {
+                "Ism": fullnameInput.value.trim(),
+                "Email": emailInput.value.trim(),
+                "Telefon": phoneInput.value.trim(),
+                "Yosh": ageInput.value,
+                "Shahar": citySelect.options[citySelect.selectedIndex]?.text,
+                "Izoh": commentArea.value.trim() || "-"
+            };
+            alert("✅ Forma valid! \n" + Object.entries(data).map(([k,v]) => `${k}: ${v}`).join("\n"));
+        }
+    }
+
+    // yakuniy topshirish (qabul qilingan holda)
+    function submitForm() {
+        const allValid = validation.fullname && validation.email && validation.phone && validation.age && validation.city;
+        const accepted = acceptToggle.checked;
+        if (!allValid) {
+            alert("⚠️ Avval barcha majburiy maydonlarni to‘g‘ri to‘ldiring!");
+            return;
+        }
+        if (!accepted) {
+            alert("📢 Qabul qilish simulyatsiyasi: Iltimos, foydalanuvchi qabul qilish tugmachasini (toggle) yoqing va shartlarni tasdiqlang.");
+            return;
+        }
+        // muvaffaqiyatli simulatsiya
+        alert(`🎉 MA’LUMOTLAR QABUL QILINDI!\n\nFoydalanuvchi qabul qilish testi muvaffaqiyatli.\nIsm: ${fullnameInput.value.trim()}\nEmail: ${emailInput.value.trim()}\nTelefon: ${phoneInput.value.trim()}\nYosh: ${ageInput.value}\nShahar: ${citySelect.value}\n\nSimulyatsiya yakunlandi. Seminarda ushbu interfeys foydalanish qulayligi talablariga mos.`);
+        // ixtiyoriy: success banner ko'rinishida acceptArea da chiqarish
+        const successBanner = document.createElement('div');
+        successBanner.className = 'success-banner';
+        successBanner.innerText = '✅ Yuborildi! Foydalanuvchi qabul qilish simulyatsiyasi muvaffaqiyatli.';
+        const oldBanner = document.querySelector('.success-banner');
+        if(oldBanner) oldBanner.remove();
+        document.querySelector('.acceptance-area').appendChild(successBanner);
+        setTimeout(() => successBanner.remove(), 4000);
+    }
+
+    // tezkor test to‘ldirish (UX test uchun)
+    function quickFill() {
+        fullnameInput.value = "Zarina Alimova";
+        emailInput.value = "zarina@test.uz";
+        phoneInput.value = "+998901234567";
+        ageInput.value = "28";
+        citySelect.value = "toshkent";
+        commentArea.value = "Forma juda qulay, real-time validatsiya ajoyib!";
+        // barcha validatsiyani yangilash
+        updateGlobalValidationState();
+        // qulaylik uchun toggle avtomatik yoqilmaydi, lekin foydalanuvchi test qilishi mumkin
+        const msg = document.createElement('div');
+        msg.style.position = 'fixed';
+        msg.style.bottom = '20px';
+        msg.style.right = '20px';
+        msg.style.background = '#2c3e50';
+        msg.style.color = 'white';
+        msg.style.padding = '10px 18px';
+        msg.style.borderRadius = '40px';
+        msg.style.fontSize = '0.8rem';
+        msg.innerText = '⚡ Tezkor to‘ldirildi. Qabul qilish tugmachasini faollashtiring!';
+        document.body.appendChild(msg);
+        setTimeout(() => msg.remove(), 2000);
+    }
+
+    function resetFormComplete() {
+        fullnameInput.value = "";
+        emailInput.value = "";
+        phoneInput.value = "";
+        ageInput.value = "";
+        citySelect.value = "";
+        commentArea.value = "";
+        acceptToggle.checked = false;
+        updateGlobalValidationState();
+        // xabarlarni tozalash
+        const banner = document.querySelector('.success-banner');
+        if(banner) banner.remove();
+        acceptDynamicMsg.innerHTML = "";
+        acceptMessageDiv.innerHTML = "📍 Forma maʼlumotlarini tekshirib, “Qabul qilish” tugmasini faollashtiring.";
+        alert("Forma tozalandi. Endi qaytadan test qilishingiz mumkin.");
+    }
+
+    // initialization
+    function init() {
+        attachEvents();
+        updateGlobalValidationState();
+        submitBtn.addEventListener('click', submitForm);
+        previewBtn.addEventListener('click', previewData);
+        quickFillBtn.addEventListener('click', quickFill);
+        resetFormBtn.addEventListener('click', resetFormComplete);
+    }
+
+    init();
+</script>
+</body>
+</html>
